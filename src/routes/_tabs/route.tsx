@@ -1,18 +1,9 @@
 import { Button } from "#/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/components/ui/dropdown-menu"
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "#/components/ui/input-group"
+import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group"
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router"
-import { ArrowLeft, Compass, History, ListFilter, MoreVertical, Search, Settings, X } from "lucide-react"
-import {
-    Sheet,
-    SheetClose,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet"
+import { Compass, History, ListFilter, MoreVertical, Search, Settings, X } from "lucide-react"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import type { LucideIcon } from "lucide-react"
 import { Badge } from "#/components/ui/badge"
 
@@ -123,7 +114,9 @@ function RouteComponent() {
                 </DropdownMenu>
             </header>
 
-            <Outlet />
+            <div className="flex-1 overflow-auto">
+                <Outlet />
+            </div>
 
             <nav className="px-4 py-3 bg-muted">
                 <div className="max-w-sm mx-auto flex items-center justify-evenly">
