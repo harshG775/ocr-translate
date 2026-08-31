@@ -1,8 +1,20 @@
 import { Button } from "#/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/components/ui/dropdown-menu"
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "#/components/ui/input-group"
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router"
-import { Compass, History, ListFilter, MoreVertical, Search, Settings } from "lucide-react"
+import { ArrowLeft, Compass, History, ListFilter, MoreVertical, Search, Settings, X } from "lucide-react"
+import {
+    Sheet,
+    SheetClose,
+    SheetContent,
+    SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet"
 import type { LucideIcon } from "lucide-react"
+import { Badge } from "#/components/ui/badge"
 
 export const Route = createFileRoute("/_tabs")({
     component: RouteComponent,
@@ -45,16 +57,59 @@ function RouteComponent() {
     return (
         <div className="h-dvh w-full flex flex-col">
             <header className="flex items-center gap-2 px-4 py-3">
-                <div className="flex flex-1 items-center gap-3 rounded-full bg-muted px-4 py-2.5">
-                    <Search className="size-5 shrink-0 text-muted-foreground" />
-                    <input
-                        type="search"
-                        placeholder="Search manga"
-                        className="w-full bg-transparent text-base font-semibold text-foreground placeholder:text-muted-foreground outline-none"
-                    />
-                </div>
+                <Sheet>
+                    <SheetTrigger
+                        className="flex-1 flex items-center gap-1 rounded-full bg-muted px-2 text-left"
+                        render={<Button variant={"ghost"} />}
+                    >
+                        <Search className="size-5 shrink-0 text-muted-foreground" />
+                        <div className="w-full bg-transparent text-base font-semibold text-muted-foreground outline-none">
+                            Search manga
+                        </div>
+                    </SheetTrigger>
+                    <SheetContent side="top" showCloseButton={false}>
+                        <SheetHeader className="sr-only">
+                            <SheetTitle>Search manga</SheetTitle>
+                            <SheetDescription>Search for manga by title, author, or genre.</SheetDescription>
+                        </SheetHeader>
+                        <div className="px-4 py-3 flex items-center gap-2">
+                            <InputGroup className="flex-1 rounded-full border-0 bg-muted">
+                                <InputGroupAddon>
+                                    <Search className="size-5 text-muted-foreground" />
+                                </InputGroupAddon>
+                                <InputGroupInput
+                                    type="text"
+                                    placeholder="Search manga"
+                                    className="text-base font-semibold"
+                                />
+                            </InputGroup>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
+                                    <MoreVertical />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem>Clear history</DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <Button variant="ghost" size="icon-sm">
+                                <X />
+                            </Button>
+                        </div>
+                        <div className="px-4 py-3">
+                            <div className="flex gap-2">
+                                {["chips", "chips", "chips", "chips"].map((item, idx) => (
+                                    <Badge key={idx} variant={"secondary"}>
+                                        {item}
+                                    </Badge>
+                                ))}
+                            </div>
+                            <div>{/* result */}</div>
+                            <div>{/* search History */}</div>
+                        </div>
+                    </SheetContent>
+                </Sheet>
                 <DropdownMenu>
-                    <DropdownMenuTrigger render={<Button variant="ghost" size="icon" />}>
+                    <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
                         <MoreVertical />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
