@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TabsRouteRouteImport } from './routes/_tabs/route'
 import { Route as TabsExploreRouteImport } from './routes/_tabs/explore'
 import { Route as TabsHistoryRouteImport } from './routes/_tabs/history'
+import { Route as MediaSlugIndexRouteImport } from './routes/media/$slug/index'
+import { Route as MediaSlugChapterSlugIndexRouteImport } from './routes/media/$slug/$chapterSlug/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -33,16 +35,31 @@ const TabsHistoryRoute = TabsHistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => TabsRouteRoute,
 } as any)
+const MediaSlugIndexRoute = MediaSlugIndexRouteImport.update({
+  id: '/media/$slug/',
+  path: '/media/$slug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MediaSlugChapterSlugIndexRoute =
+  MediaSlugChapterSlugIndexRouteImport.update({
+    id: '/media/$slug/$chapterSlug/',
+    path: '/media/$slug/$chapterSlug/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/explore': typeof TabsExploreRoute
   '/history': typeof TabsHistoryRoute
+  '/media/$slug/': typeof MediaSlugIndexRoute
+  '/media/$slug/$chapterSlug/': typeof MediaSlugChapterSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/explore': typeof TabsExploreRoute
   '/history': typeof TabsHistoryRoute
+  '/media/$slug': typeof MediaSlugIndexRoute
+  '/media/$slug/$chapterSlug': typeof MediaSlugChapterSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,18 +67,35 @@ export interface FileRoutesById {
   '/_tabs': typeof TabsRouteRouteWithChildren
   '/_tabs/explore': typeof TabsExploreRoute
   '/_tabs/history': typeof TabsHistoryRoute
+  '/media/$slug/': typeof MediaSlugIndexRoute
+  '/media/$slug/$chapterSlug/': typeof MediaSlugChapterSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/explore' | '/history'
+  fullPaths:
+    | '/'
+    | '/explore'
+    | '/history'
+    | '/media/$slug/'
+    | '/media/$slug/$chapterSlug/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/explore' | '/history'
-  id: '__root__' | '/' | '/_tabs' | '/_tabs/explore' | '/_tabs/history'
+  to:
+    '/' | '/explore' | '/history' | '/media/$slug' | '/media/$slug/$chapterSlug'
+  id:
+    | '__root__'
+    | '/'
+    | '/_tabs'
+    | '/_tabs/explore'
+    | '/_tabs/history'
+    | '/media/$slug/'
+    | '/media/$slug/$chapterSlug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   TabsRouteRoute: typeof TabsRouteRouteWithChildren
+  MediaSlugIndexRoute: typeof MediaSlugIndexRoute
+  MediaSlugChapterSlugIndexRoute: typeof MediaSlugChapterSlugIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -94,6 +128,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsHistoryRouteImport
       parentRoute: typeof TabsRouteRoute
     }
+    '/media/$slug/': {
+      id: '/media/$slug/'
+      path: '/media/$slug'
+      fullPath: '/media/$slug/'
+      preLoaderRoute: typeof MediaSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/media/$slug/$chapterSlug/': {
+      id: '/media/$slug/$chapterSlug/'
+      path: '/media/$slug/$chapterSlug'
+      fullPath: '/media/$slug/$chapterSlug/'
+      preLoaderRoute: typeof MediaSlugChapterSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -114,6 +162,8 @@ const TabsRouteRouteWithChildren = TabsRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   TabsRouteRoute: TabsRouteRouteWithChildren,
+  MediaSlugIndexRoute: MediaSlugIndexRoute,
+  MediaSlugChapterSlugIndexRoute: MediaSlugChapterSlugIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

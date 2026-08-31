@@ -26,7 +26,7 @@ type NavItem = {
 const navItems: NavItem[] = [
     {
         label: "History",
-        to: "/History",
+        to: "/history",
         icon: History,
         menuItems: [
             { label: "List options", icon: ListFilter },
