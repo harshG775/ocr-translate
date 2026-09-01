@@ -14,7 +14,7 @@ function RouteComponent() {
         <main className="px-4 py-3">
             <p className="text-sm text-muted-foreground">ID: {id}</p>
             <h1 className="text-lg font-semibold">{title}</h1>
-            <Button render={<Link to="/media/$slug/$chapterSlug" params={{ slug, chapterSlug: "chapter-1" }} />}>
+            <Button nativeButton={false} render={<Link to="/media/$slug/$chapterSlug" params={{ slug, chapterSlug: "chapter-1" }} />}>
                 Read
             </Button>
         </main>

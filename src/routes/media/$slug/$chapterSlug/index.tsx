@@ -18,7 +18,7 @@ function RouteComponent() {
     return (
         <div className="flex min-h-dvh flex-col">
             <header className="flex items-center gap-3 px-4 py-3">
-                <Button variant="ghost" size="icon" render={<Link to="/media/$slug" params={{ slug }} />}>
+                <Button variant="ghost" size="icon" nativeButton={false} render={<Link to="/media/$slug" params={{ slug }} />}>
                     <ArrowLeft />
                 </Button>
                 <div>
