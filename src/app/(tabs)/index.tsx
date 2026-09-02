@@ -11,7 +11,7 @@ export default function Index() {
                 justifyContent: "center",
             }}
         >
-            <ThemedText>Edit src/app/index.tsx to edit this screen.</ThemedText>
+            <ThemedText>src/app/(tabs)/index.tsx</ThemedText>
             <ExternalLink href="https://docs.expo.dev/versions/v57.0.0/">
                 <ThemedText>Open Expo docs</ThemedText>
             </ExternalLink>

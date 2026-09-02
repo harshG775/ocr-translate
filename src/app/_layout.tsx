@@ -9,7 +9,9 @@ export default function RootLayout() {
         <SafeAreaProvider>
             <ThemeModeProvider>
                 <ThemeProvider>
-                    <Stack />
+                    <Stack>
+                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    </Stack>
                     <StatusBar_ />
                 </ThemeProvider>
             </ThemeModeProvider>
