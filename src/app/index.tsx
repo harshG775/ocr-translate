@@ -1,8 +1,8 @@
-import { useThemeContext } from "@/components/contexts/theme-provider";
-import { Text, View } from "react-native";
+import { ExternalLink } from "@/components/ui/external-link";
+import { ThemedText } from "@/components/ui/themed-text";
+import { View } from "react-native";
 
 export default function Index() {
-    const { colors } = useThemeContext();
     return (
         <View
             style={{
@@ -11,7 +11,10 @@ export default function Index() {
                 justifyContent: "center",
             }}
         >
-            <Text style={{ color: colors.text }}>Edit src/app/index.tsx to edit this screen.</Text>
+            <ThemedText>Edit src/app/index.tsx to edit this screen.</ThemedText>
+            <ExternalLink href="https://docs.expo.dev/versions/v57.0.0/">
+                <ThemedText>Open Expo docs</ThemedText>
+            </ExternalLink>
         </View>
     );
 }
