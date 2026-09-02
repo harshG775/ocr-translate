@@ -11,7 +11,7 @@ export default function Index() {
                 justifyContent: "center",
             }}
         >
-            <Text style={{ color: colors.foreground }}>Edit src/app/index.tsx to edit this screen.</Text>
+            <Text style={{ color: colors.text }}>Edit src/app/index.tsx to edit this screen.</Text>
         </View>
     );
 }

@@ -1,12 +1,15 @@
-import { COLORS, RADIUS, SPACING } from "@/constants/theme";
+import { THEME } from "@/constants/theme";
 import { DefaultTheme, ThemeProvider as ExpoThemeProvider } from "expo-router";
 import { createContext, useContext, useMemo } from "react";
 import { ThemeMode, useThemeModeContext } from "./theme-mode-provider";
 
 type ThemeContextType = {
-    colors: (typeof COLORS)[ThemeMode];
-    radius: typeof RADIUS;
-    spacing: typeof SPACING;
+    colors: (typeof THEME.colors)[ThemeMode];
+    fonts: typeof THEME.fonts;
+    radius: typeof THEME.radius;
+    spacing: typeof THEME.spacing;
+    maxContentWidth: typeof THEME.maxContentWidth;
+    bottomTabInset: typeof THEME.bottomTabInset;
 };
 
 type ThemeProviderProps = {
@@ -23,12 +26,12 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
             dark: mode === "dark",
             colors: {
                 ...DefaultTheme.colors,
-                primary: COLORS[mode].primary,
-                text: COLORS[mode].foreground,
-                background: COLORS[mode].background,
-                card: COLORS[mode].card,
-                border: COLORS[mode].border,
-                notification: COLORS[mode].destructive,
+                primary: THEME.colors[mode].primary,
+                text: THEME.colors[mode].text,
+                background: THEME.colors[mode].background,
+                card: THEME.colors[mode].card,
+                border: THEME.colors[mode].border,
+                notification: THEME.colors[mode].notification,
             },
         }),
         [mode],
@@ -36,9 +39,12 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     const value = useMemo(
         () => ({
-            colors: COLORS[mode],
-            radius: RADIUS,
-            spacing: SPACING,
+            colors: THEME.colors[mode],
+            fonts: THEME.fonts,
+            radius: THEME.radius,
+            spacing: THEME.spacing,
+            maxContentWidth: THEME.maxContentWidth,
+            bottomTabInset: THEME.bottomTabInset,
         }),
         [mode],
     );
