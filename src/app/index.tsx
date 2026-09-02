@@ -1,17 +1,17 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useThemeContext } from "@/components/contexts/theme-provider";
+import { Text, View } from "react-native";
 
 export default function Index() {
+    const { colors } = useThemeContext();
     return (
-        <View style={styles.container}>
-            <Text>Edit src/app/index.tsx to edit this screen.</Text>
+        <View
+            style={{
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+            }}
+        >
+            <Text style={{ color: colors.foreground }}>Edit src/app/index.tsx to edit this screen.</Text>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-});
