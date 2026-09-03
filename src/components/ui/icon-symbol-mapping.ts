@@ -10,6 +10,7 @@ export const ICON_MAPPING = {
     gearshape: "settings",
     "list.bullet": "format-list-bulleted",
     bookmark: "bookmark-border",
+    "chevron.left": "arrow-back",
 } satisfies Partial<Record<SFSymbol, MaterialIconsIconName>>;
 
 export type IconSymbolName = keyof typeof ICON_MAPPING;

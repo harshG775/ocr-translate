@@ -7,7 +7,7 @@ import BottomSheet, { BottomSheetBackdrop, type BottomSheetBackdropProps, Bottom
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { NavigationBar } from "expo-navigation-bar";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -24,7 +24,7 @@ export default function Reader() {
     const [insets] = useState(liveInsets);
     const bottomSheetRef = useRef<BottomSheet>(null);
 
-    const styles = createStyles({ radius, spacing, insets: { bottom: insets.bottom } });
+    const styles = createStyles({ radius, spacing, insets: { top: insets.top, bottom: insets.bottom } });
 
     const renderBackdrop = useCallback(
         (props: BottomSheetBackdropProps) => (
@@ -35,7 +35,7 @@ export default function Reader() {
 
     return (
         <View style={{ flex: 1 }}>
-            <Stack.Screen options={{ headerShown: !isImmersive }} />
+            <Stack.Screen options={{ headerShown: false }} />
             <StatusBar hidden={isImmersive} />
             <NavigationBar hidden={isImmersive} />
 
@@ -54,6 +54,10 @@ export default function Reader() {
 
             {!isImmersive && (
                 <>
+                    <ThemedView style={styles.topBar}>
+                        <BarButton icon="chevron.left" color={colors.text} onPress={() => router.back()} />
+                    </ThemedView>
+
                     <ThemedView style={styles.bottomBar}>
                         <BarButton icon="list.bullet" color={colors.text} onPress={() => {}} />
                         <BarButton icon="bookmark" color={colors.text} onPress={() => {}} />
@@ -96,7 +100,7 @@ function BarButton({ icon, color, onPress }: BarButtonProps) {
 }
 
 type StyleTheme = Pick<ReturnType<typeof useThemeContext>, "radius" | "spacing"> & {
-    insets: { bottom: number };
+    insets: { top: number; bottom: number };
 };
 
 function createStyles({ radius, spacing, insets }: StyleTheme) {
@@ -107,6 +111,17 @@ function createStyles({ radius, spacing, insets }: StyleTheme) {
         page: {
             width: "100%",
             aspectRatio: 2 / 3,
+        },
+        topBar: {
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 0,
+            flexDirection: "row",
+            alignItems: "center",
+            paddingTop: spacing.md + insets.top,
+            paddingBottom: spacing.md,
+            paddingHorizontal: spacing.md,
         },
         bottomBar: {
             position: "absolute",
