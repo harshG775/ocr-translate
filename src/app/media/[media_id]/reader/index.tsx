@@ -3,25 +3,35 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { IconSymbolName } from "@/components/ui/icon-symbol-mapping";
 import { ThemedText } from "@/components/ui/themed-text";
 import { ThemedView } from "@/components/ui/themed-view";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetBackdrop, type BottomSheetBackdropProps, BottomSheetView } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { NavigationBar } from "expo-navigation-bar";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const PAGES = Array.from({ length: 10 }, (_, index) => `https://placehold.co/720x1080?text=Page+${index + 1}`);
+const SHEET_SNAP_POINTS = ["40%", "90%"];
 
 export default function Reader() {
     const [isImmersive, setImmersive] = useState(false);
+    const [sheetIndex, setSheetIndex] = useState(-1);
     const { colors, radius, spacing } = useThemeContext();
     const liveInsets = useSafeAreaInsets();
+    const [insets] = useState(liveInsets);
     const bottomSheetRef = useRef<BottomSheet>(null);
 
-    const styles = createStyles({ radius, spacing, insets: { bottom: liveInsets.bottom } });
+    const styles = createStyles({ radius, spacing, insets: { bottom: insets.bottom } });
+
+    const renderBackdrop = useCallback(
+        (props: BottomSheetBackdropProps) => (
+            <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior="close" />
+        ),
+        [],
+    );
 
     return (
         <View style={{ flex: 1 }}>
@@ -43,25 +53,30 @@ export default function Reader() {
             />
 
             {!isImmersive && (
-                <ThemedView style={styles.bottomBar}>
-                    <BarButton icon="list.bullet" color={colors.text} onPress={() => {}} />
-                    <BarButton icon="bookmark" color={colors.text} onPress={() => {}} />
-                    <BarButton icon="gearshape" color={colors.text} onPress={() => bottomSheetRef.current?.expand()} />
-                </ThemedView>
-            )}
+                <>
+                    <ThemedView style={styles.bottomBar}>
+                        <BarButton icon="list.bullet" color={colors.text} onPress={() => {}} />
+                        <BarButton icon="bookmark" color={colors.text} onPress={() => {}} />
+                        <BarButton icon="gearshape" color={colors.text} onPress={() => setSheetIndex(0)} />
+                    </ThemedView>
 
-            <BottomSheet
-                ref={bottomSheetRef}
-                index={-1}
-                snapPoints={["40%"]}
-                enablePanDownToClose
-                backgroundStyle={{ backgroundColor: colors.card }}
-                handleIndicatorStyle={{ backgroundColor: colors.border }}
-            >
-                <BottomSheetView style={styles.sheetContent}>
-                    <ThemedText style={styles.sheetTitle}>Read mode</ThemedText>
-                </BottomSheetView>
-            </BottomSheet>
+                    <BottomSheet
+                        ref={bottomSheetRef}
+                        index={sheetIndex}
+                        onChange={setSheetIndex}
+                        snapPoints={SHEET_SNAP_POINTS}
+                        enableDynamicSizing={false}
+                        enablePanDownToClose
+                        backdropComponent={renderBackdrop}
+                        backgroundStyle={{ backgroundColor: colors.card }}
+                        handleIndicatorStyle={{ backgroundColor: colors.border }}
+                    >
+                        <BottomSheetView style={styles.sheetContent}>
+                            <ThemedText style={styles.sheetTitle}>Read mode</ThemedText>
+                        </BottomSheetView>
+                    </BottomSheet>
+                </>
+            )}
         </View>
     );
 }
@@ -101,10 +116,8 @@ function createStyles({ radius, spacing, insets }: StyleTheme) {
             flexDirection: "row",
             justifyContent: "space-around",
             alignItems: "center",
-            paddingTop: spacing.sm,
+            paddingTop: spacing.md,
             paddingBottom: spacing.sm + insets.bottom,
-            borderTopLeftRadius: radius.lg,
-            borderTopRightRadius: radius.lg,
         },
         sheetContent: {
             padding: spacing.md,
