@@ -1,25 +1,31 @@
 import { ThemeModeProvider, useThemeModeContext } from "@/components/contexts/theme-mode-provider";
 import { ThemeProvider } from "@/components/contexts/theme-provider";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function RootLayout() {
     return (
-        <SafeAreaProvider>
-            <ThemeModeProvider>
-                <ThemeProvider>
-                    <Stack
-                        screenOptions={{
-                            animation: "fade_from_bottom",
-                        }}
-                    >
-                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    </Stack>
-                    <StatusBar_ />
-                </ThemeProvider>
-            </ThemeModeProvider>
-        </SafeAreaProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <SafeAreaProvider>
+                <ThemeModeProvider>
+                    <ThemeProvider>
+                        <BottomSheetModalProvider>
+                            <Stack
+                                screenOptions={{
+                                    animation: "fade_from_bottom",
+                                }}
+                            >
+                                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                            </Stack>
+                            <StatusBar_ />
+                        </BottomSheetModalProvider>
+                    </ThemeProvider>
+                </ThemeModeProvider>
+            </SafeAreaProvider>
+        </GestureHandlerRootView>
     );
 }
 function StatusBar_() {

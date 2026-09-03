@@ -8,6 +8,8 @@ export const ICON_MAPPING = {
     photo: "insert-photo",
     "clock.arrow.circlepath": "restore",
     gearshape: "settings",
+    "list.bullet": "format-list-bulleted",
+    bookmark: "bookmark-border",
 } satisfies Partial<Record<SFSymbol, MaterialIconsIconName>>;
 
 export type IconSymbolName = keyof typeof ICON_MAPPING;

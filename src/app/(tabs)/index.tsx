@@ -2,8 +2,9 @@ import { useThemeContext } from "@/components/contexts/theme-provider";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ThemedText } from "@/components/ui/themed-text";
 import { ThemedView } from "@/components/ui/themed-view";
+import { FlashList } from "@shopify/flash-list";
 import { Link } from "expo-router";
-import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 type MediaType = "manga" | "manhwa" | "manhua";
 
@@ -25,11 +26,11 @@ export default function Index() {
 
     return (
         <ThemedView style={styles.container}>
-            <FlatList
+            <FlashList
                 data={items}
                 keyExtractor={(item) => String(item.id)}
+                drawDistance={1500}
                 numColumns={NUM_COLUMNS}
-                columnWrapperStyle={styles.row}
                 contentContainerStyle={styles.list}
                 renderItem={({ item }) => <HistoryItem item={item} />}
             />
@@ -85,11 +86,7 @@ function createListStyles({ spacing }: StyleTheme) {
             flex: 1,
         },
         list: {
-            padding: spacing.md,
-            gap: spacing.sm,
-        },
-        row: {
-            gap: spacing.sm,
+            padding: spacing.md - spacing.sm / 2,
         },
     });
 }
@@ -98,6 +95,7 @@ function createItemStyles({ radius, spacing }: StyleTheme) {
     return StyleSheet.create({
         item: {
             flex: 1 / NUM_COLUMNS,
+            margin: spacing.sm / 2,
         },
         card: {
             borderRadius: radius.lg,
