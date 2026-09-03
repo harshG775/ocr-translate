@@ -1,10 +1,10 @@
 import { ThemedText } from "@/components/ui/themed-text";
 import { View } from "react-native";
 
-export default function Explore() {
+export default function Index() {
     return (
         <View>
-            <ThemedText>src/app/(tabs)/explore.tsx</ThemedText>
+            <ThemedText>src/app/media/[id]/index.tsx</ThemedText>
         </View>
     );
 }

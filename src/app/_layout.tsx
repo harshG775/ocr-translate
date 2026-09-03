@@ -9,7 +9,11 @@ export default function RootLayout() {
         <SafeAreaProvider>
             <ThemeModeProvider>
                 <ThemeProvider>
-                    <Stack>
+                    <Stack
+                        screenOptions={{
+                            animation: "fade_from_bottom",
+                        }}
+                    >
                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                     </Stack>
                     <StatusBar_ />
