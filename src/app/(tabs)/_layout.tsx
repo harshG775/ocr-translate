@@ -19,6 +19,14 @@ export default function Layout() {
                     ),
                 }}
             />
+            <Tabs.Screen
+                name="test"
+                options={{
+                    headerShown: false,
+                    title: "Test",
+                    tabBarIcon: ({ color, size }) => <IconSymbol name="gearshape" size={size} color={color} />,
+                }}
+            />
         </Tabs>
     );
 }
