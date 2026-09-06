@@ -60,7 +60,7 @@ function SeriesItem({ item }: SeriesItemProps) {
         <Link
             href={{
                 pathname: "/media/[media_id]",
-                params: { media_id: item.slug },
+                params: { media_id: item.id },
             }}
             asChild
             style={styles.item}

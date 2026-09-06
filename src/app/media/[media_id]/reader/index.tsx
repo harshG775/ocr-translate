@@ -4,17 +4,17 @@ import type { IconSymbolName } from "@/components/ui/icon-symbol-mapping";
 import { ThemedText } from "@/components/ui/themed-text";
 import { ThemedView } from "@/components/ui/themed-view";
 import { useChapterPages, type Page } from "@/hooks/use-chapter-pages";
+import { chapterReaderUrl } from "@/lib/asurascans";
 import BottomSheet, { BottomSheetBackdrop, type BottomSheetBackdropProps, BottomSheetView } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { NavigationBar } from "expo-navigation-bar";
-import { router, Stack } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const chapterUrl = "https://asurascans.com/comics/the-regressed-mercenarys-machinations-08677664/chapter/4";
 const SHEET_SNAP_POINTS = ["40%", "90%"];
 
 function ReaderPage({
@@ -52,6 +52,10 @@ function ReaderPage({
 }
 
 export default function Reader() {
+    const { media_id, chapter } = useLocalSearchParams<{ media_id: string; chapter?: string }>();
+    const chapterNumber = Number(chapter) || 1;
+    const chapterUrl = chapterReaderUrl(media_id, chapterNumber);
+
     const [isImmersive, setImmersive] = useState(false);
     const [sheetIndex, setSheetIndex] = useState(-1);
     const { colors, radius, spacing } = useThemeContext();
