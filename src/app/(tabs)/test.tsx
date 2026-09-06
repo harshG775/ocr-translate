@@ -5,23 +5,30 @@ import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { fetch } from "expo/fetch";
 import { parse } from "node-html-parser";
-import { Image as RNImage, useWindowDimensions } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, Image as RNImage, useWindowDimensions } from "react-native";
 
-const chapterUrl = "https://asurascans.com/comics/the-regressed-mercenarys-machinations-08677664/chapter/2";
+const chapterUrl = "https://asurascans.com/comics/the-regressed-mercenarys-machinations-08677664/chapter/4";
 
 type Page = { uri: string; width: number; height: number };
 
 function ReaderPage({ page, referer, screenWidth }: { page: Page; referer: string; screenWidth: number }) {
     const height = screenWidth * (page.height / page.width);
+    const [loading, setLoading] = useState(true);
 
     return (
-        <Image
-            source={{ uri: page.uri, headers: { Referer: referer } }}
-            style={{ width: screenWidth, height }}
-            contentFit="cover"
-            cachePolicy="memory-disk"
-            recyclingKey={page.uri}
-        />
+        <ThemedView style={{ width: screenWidth, height }}>
+            <Image
+                source={{ uri: page.uri, headers: { Referer: referer } }}
+                style={{ width: screenWidth, height }}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                recyclingKey={page.uri}
+                onLoadStart={() => setLoading(true)}
+                onLoadEnd={() => setLoading(false)}
+            />
+            {loading && <ActivityIndicator style={{ position: "absolute", top: 24, left: 0, right: 0 }} size="large" />}
+        </ThemedView>
     );
 }
 
