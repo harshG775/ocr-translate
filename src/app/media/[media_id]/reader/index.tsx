@@ -3,6 +3,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import type { IconSymbolName } from "@/components/ui/icon-symbol-mapping";
 import { ThemedText } from "@/components/ui/themed-text";
 import { ThemedView } from "@/components/ui/themed-view";
+import { useChapterPages, type Page } from "@/hooks/use-chapter-pages";
 import BottomSheet, { BottomSheetBackdrop, type BottomSheetBackdropProps, BottomSheetView } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
@@ -10,11 +11,45 @@ import { NavigationBar } from "expo-navigation-bar";
 import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const PAGES = Array.from({ length: 10 }, (_, index) => `https://placehold.co/720x1080?text=Page+${index + 1}`);
+const chapterUrl = "https://asurascans.com/comics/the-regressed-mercenarys-machinations-08677664/chapter/4";
 const SHEET_SNAP_POINTS = ["40%", "90%"];
+
+function ReaderPage({
+    page,
+    referer,
+    screenWidth,
+    onPress,
+}: {
+    page: Page;
+    referer: string;
+    screenWidth: number;
+    onPress: () => void;
+}) {
+    const height = screenWidth * (page.height / page.width);
+    const [loading, setLoading] = useState(true);
+
+    return (
+        <Pressable onPress={onPress}>
+            <View style={{ width: screenWidth, height }}>
+                <Image
+                    source={{ uri: page.uri, headers: { Referer: referer } }}
+                    style={{ width: screenWidth, height }}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    recyclingKey={page.uri}
+                    onLoadStart={() => setLoading(true)}
+                    onLoadEnd={() => setLoading(false)}
+                />
+                {loading && (
+                    <ActivityIndicator style={{ position: "absolute", top: 24, left: 0, right: 0 }} size="large" />
+                )}
+            </View>
+        </Pressable>
+    );
+}
 
 export default function Reader() {
     const [isImmersive, setImmersive] = useState(false);
@@ -23,6 +58,8 @@ export default function Reader() {
     const liveInsets = useSafeAreaInsets();
     const [insets] = useState(liveInsets);
     const bottomSheetRef = useRef<BottomSheet>(null);
+    const { width: screenWidth } = useWindowDimensions();
+    const { pages, referer, isLoading, error } = useChapterPages(chapterUrl);
 
     const styles = createStyles({ radius, spacing, insets: { top: insets.top, bottom: insets.bottom } });
 
@@ -39,18 +76,31 @@ export default function Reader() {
             <StatusBar hidden={isImmersive} />
             <NavigationBar hidden={isImmersive} />
 
-            <FlashList
-                data={PAGES}
-                keyExtractor={(uri) => uri}
-                drawDistance={1500}
-                renderItem={({ item }) => (
-                    <Pressable onPress={() => setImmersive((prev) => !prev)}>
-                        <Image source={{ uri: item }} style={styles.page} contentFit="contain" />
-                    </Pressable>
-                )}
-                contentContainerStyle={styles.pages}
-                showsVerticalScrollIndicator={false}
-            />
+            {isLoading ? (
+                <ThemedView style={styles.centered}>
+                    <ThemedText>Loading chapter…</ThemedText>
+                </ThemedView>
+            ) : error || !pages?.length ? (
+                <ThemedView style={styles.centered}>
+                    <ThemedText>Couldn't load this chapter.</ThemedText>
+                </ThemedView>
+            ) : (
+                <FlashList
+                    data={pages}
+                    keyExtractor={(page) => page.uri}
+                    drawDistance={1500}
+                    renderItem={({ item }) => (
+                        <ReaderPage
+                            page={item}
+                            referer={referer}
+                            screenWidth={screenWidth}
+                            onPress={() => setImmersive((prev) => !prev)}
+                        />
+                    )}
+                    contentContainerStyle={styles.pages}
+                    showsVerticalScrollIndicator={false}
+                />
+            )}
 
             {!isImmersive && (
                 <>
@@ -108,9 +158,10 @@ function createStyles({ radius, spacing, insets }: StyleTheme) {
         pages: {
             gap: 2,
         },
-        page: {
-            width: "100%",
-            aspectRatio: 2 / 3,
+        centered: {
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
         },
         topBar: {
             position: "absolute",
