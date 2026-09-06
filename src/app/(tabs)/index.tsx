@@ -1,56 +1,66 @@
 import { useThemeContext } from "@/components/contexts/theme-provider";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ThemedText } from "@/components/ui/themed-text";
 import { ThemedView } from "@/components/ui/themed-view";
+import { useLatestUpdates } from "@/hooks/use-latest-updates";
+import type { LatestSeries } from "@/lib/asurascans";
 import { FlashList } from "@shopify/flash-list";
+import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { Pressable, StyleSheet, View } from "react-native";
-
-type MediaType = "manga" | "manhwa" | "manhua";
-
-const mediaTypes: MediaType[] = ["manga", "manhwa", "manhua"];
-
-const items = Array.from({ length: 20 }, (_, index) => ({
-    id: index + 1,
-    title: `Manga title ${index + 1}`,
-    chapter: index + 1,
-    updatedAt: `${(index + 1) * 3}m ago`,
-    mediaType: mediaTypes[index % mediaTypes.length],
-}));
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
 const NUM_COLUMNS = 2;
 
 export default function Index() {
     const { radius, spacing } = useThemeContext();
     const styles = createListStyles({ radius, spacing });
+    const { series, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useLatestUpdates();
+
+    if (isLoading) {
+        return (
+            <ThemedView style={styles.centered}>
+                <ThemedText>Loading latest updates…</ThemedText>
+            </ThemedView>
+        );
+    }
+
+    if (error || !series.length) {
+        return (
+            <ThemedView style={styles.centered}>
+                <ThemedText>Couldn't load latest updates.</ThemedText>
+            </ThemedView>
+        );
+    }
 
     return (
         <ThemedView style={styles.container}>
             <FlashList
-                data={items}
-                keyExtractor={(item) => String(item.id)}
-                drawDistance={1500}
+                data={series}
+                keyExtractor={(item) => item.slug}
                 numColumns={NUM_COLUMNS}
                 contentContainerStyle={styles.list}
-                renderItem={({ item }) => <HistoryItem item={item} />}
+                renderItem={({ item }) => <SeriesItem item={item} />}
+                onEndReached={() => hasNextPage && fetchNextPage()}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={isFetchingNextPage ? <ActivityIndicator style={styles.footer} /> : null}
             />
         </ThemedView>
     );
 }
 
-type HistoryItemProps = {
-    item: (typeof items)[number];
+type SeriesItemProps = {
+    item: LatestSeries;
 };
 
-function HistoryItem({ item }: HistoryItemProps) {
+function SeriesItem({ item }: SeriesItemProps) {
     const { colors, radius, spacing } = useThemeContext();
     const styles = createItemStyles({ radius, spacing });
+    const latest = item.chapters[0];
 
     return (
         <Link
             href={{
                 pathname: "/media/[media_id]",
-                params: { media_id: `${item.id}-${item.title}` },
+                params: { media_id: item.slug },
             }}
             asChild
             style={styles.item}
@@ -58,15 +68,20 @@ function HistoryItem({ item }: HistoryItemProps) {
             <Pressable>
                 <View style={[styles.card, { backgroundColor: colors.card }]}>
                     <View style={[styles.thumbnail, { backgroundColor: colors.border }]}>
-                        <IconSymbol name="photo" size={32} color={colors.text} style={styles.thumbnailIcon} />
+                        <Image
+                            source={{ uri: item.cover }}
+                            style={styles.thumbnailImage}
+                            contentFit="cover"
+                            cachePolicy="memory-disk"
+                        />
                         <View style={[styles.badge, { backgroundColor: colors.background }]}>
-                            <ThemedText style={styles.badgeText}>{item.mediaType}</ThemedText>
+                            <ThemedText style={styles.badgeText}>{item.type}</ThemedText>
                         </View>
                     </View>
                     <View style={styles.info}>
                         <View style={styles.metaRow}>
-                            <ThemedText style={styles.metaText}>Ch.{item.chapter}</ThemedText>
-                            <ThemedText style={styles.metaText}>{item.updatedAt}</ThemedText>
+                            <ThemedText style={styles.metaText}>Ch.{latest.number}</ThemedText>
+                            <ThemedText style={styles.metaText}>{latest.timeAgo}</ThemedText>
                         </View>
                         <ThemedText style={styles.title} numberOfLines={2}>
                             {item.title}
@@ -85,8 +100,16 @@ function createListStyles({ spacing }: StyleTheme) {
         container: {
             flex: 1,
         },
+        centered: {
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+        },
         list: {
             padding: spacing.md - spacing.sm / 2,
+        },
+        footer: {
+            paddingVertical: spacing.md,
         },
     });
 }
@@ -107,8 +130,9 @@ function createItemStyles({ radius, spacing }: StyleTheme) {
             alignItems: "center",
             justifyContent: "center",
         },
-        thumbnailIcon: {
-            opacity: 0.5,
+        thumbnailImage: {
+            width: "100%",
+            height: "100%",
         },
         badge: {
             position: "absolute",
