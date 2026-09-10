@@ -50,7 +50,7 @@
  */
 
 import React, { useReducer, useRef } from "react";
-import { View, Text as RNText, Pressable, StyleSheet, ViewStyle, TextStyle } from "react-native";
+import { View, Text as RNText, Pressable, TextInput, StyleSheet, ViewStyle, TextStyle } from "react-native";
 
 // ---------------------------------------------------------------------------
 // 1. Composition engine: the implicit-parent stack
@@ -142,6 +142,9 @@ class ModifierBuilder {
     border(width: number, color: string, radius = 0) {
         return this.next("border", [width, color, radius]);
     }
+    weight(value: number = 1) {
+        return this.next("weight", [value]);
+    }
 
     /** Combine with another modifier (or array of them) — same effect as chaining. */
     then(other: ModifierLike) {
@@ -189,6 +192,9 @@ class ModifierBuilder {
                     break;
                 case "border":
                     style = { ...style, borderWidth: args[0], borderColor: args[1], borderRadius: args[2] };
+                    break;
+                case "weight":
+                    style = { ...style, flex: args[0] };
                     break;
             }
         }
@@ -305,6 +311,15 @@ export function Button(props: { text: string; onClick: () => void; modifier?: Mo
     leaf("Button", props);
 }
 
+export function TextField(props: {
+    value: string;
+    onChangeText: (next: string) => void;
+    placeholder?: string;
+    modifier?: ModifierLike;
+}) {
+    leaf("TextField", props);
+}
+
 // ---------------------------------------------------------------------------
 // 6. Scaffold + Theme
 // ---------------------------------------------------------------------------
@@ -409,6 +424,14 @@ function renderNode(node: ComposeNode, key: React.Key): React.ReactNode {
             });
         case "Text":
             return React.createElement(RNText, { key, style: [node.props.style, style] }, node.props.text);
+        case "TextField":
+            return React.createElement(TextInput, {
+                key,
+                value: node.props.value,
+                onChangeText: node.props.onChangeText,
+                placeholder: node.props.placeholder,
+                style: [styles.textField, style as TextStyle],
+            });
         case "Button":
             return React.createElement(
                 Pressable,
@@ -437,6 +460,14 @@ const styles = StyleSheet.create({
     },
     buttonPressed: { opacity: 0.7 },
     buttonText: { color: MaterialTheme.colorScheme.onPrimary, fontSize: 16, fontWeight: "600" },
+    textField: {
+        borderWidth: 1,
+        borderColor: "#CAC4D0",
+        borderRadius: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        fontSize: 16,
+    },
 });
 
 // ---------------------------------------------------------------------------
@@ -521,3 +552,95 @@ function Counter({ name, modifier = Modifier }: { name: string; modifier?: Modif
 }
 
 export default activityComponent(MainActivity);
+
+// ---------------------------------------------------------------------------
+// 11. Demo — a todo list, showing list state (`remember<Todo[]>([])`) and a
+//     variable-length loop of composables. Per the rule of composition above,
+//     that's safe here only because the per-item composables (Row/Text/
+//     Button) don't call `remember()` themselves — the list's own identity
+//     lives in the `todos` array, not in per-item slots.
+// ---------------------------------------------------------------------------
+
+interface Todo {
+    id: number;
+    text: string;
+    done: boolean;
+}
+
+class TodoActivity extends ComponentActivity {
+    onCreate(savedInstanceState: unknown) {
+        super.onCreate(savedInstanceState);
+        enableEdgeToEdge();
+
+        setContent({}, () => {
+            MyApplicationTheme({}, () => {
+                Scaffold({ modifier: Modifier.fillMaxSize() }, (innerPadding) => {
+                    TodoList({ modifier: Modifier.padding(innerPadding) });
+                });
+            });
+        });
+    }
+}
+
+function TodoList({ modifier = Modifier }: { modifier?: ModifierLike }) {
+    const draft = remember("");
+    const todos = remember<Todo[]>([]);
+    const nextId = remember(1);
+
+    function addTodo() {
+        const text = draft.value.trim();
+        if (!text) return;
+        todos.value = [...todos.value, { id: nextId.value, text, done: false }];
+        nextId.value++;
+        draft.value = "";
+    }
+
+    function toggleTodo(id: number) {
+        todos.value = todos.value.map((todo) => (todo.id === id ? { ...todo, done: !todo.done } : todo));
+    }
+
+    function removeTodo(id: number) {
+        todos.value = todos.value.filter((todo) => todo.id !== id);
+    }
+
+    Column({ modifier: [modifier, Modifier.fillMaxSize(), Modifier.padding(16)] }, () => {
+        Text({ text: "Todo", style: MaterialTheme.typography.titleLarge });
+        Spacer({ modifier: Modifier.height(16) });
+
+        Row({ verticalAlignment: Alignment.CenterVertically }, () => {
+            TextField({
+                value: draft.value,
+                onChangeText: (next) => (draft.value = next),
+                placeholder: "Add a todo…",
+                modifier: Modifier.weight(1),
+            });
+            Spacer({ modifier: Modifier.width(8) });
+            Button({ text: "Add", onClick: addTodo });
+        });
+
+        Spacer({ modifier: Modifier.height(16) });
+
+        if (todos.value.length === 0) {
+            Text({ text: "Nothing to do yet.", style: { color: "#79747E" } });
+        }
+
+        todos.value.forEach((todo) => {
+            Row(
+                { verticalAlignment: Alignment.CenterVertically, modifier: Modifier.padding({ top: 4, bottom: 4 }) },
+                () => {
+                    Button({ text: todo.done ? "☑" : "☐", onClick: () => toggleTodo(todo.id) });
+                    Spacer({ modifier: Modifier.width(8) });
+                    Text({
+                        text: todo.text,
+                        modifier: Modifier.weight(1),
+                        style: todo.done ? { textDecorationLine: "line-through", color: "#79747E" } : undefined,
+                    });
+                    Spacer({ modifier: Modifier.width(8) });
+                    Button({ text: "✕", onClick: () => removeTodo(todo.id) });
+                },
+            );
+        });
+    });
+}
+
+export const TodoScreen = activityComponent(TodoActivity);
